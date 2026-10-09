@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Film Prop App</title>
+    <style>
+        :root {
+            --primary: #fe2c55;
+            --dark: #121212;
+            --gray: #2f2f2f;
+            --text: #ffffff;
+            --chat-bg-me: #fe2c55;
+            --chat-bg-other: #2f2f2f;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body {
+            background-color: #000;
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: var(--dark);
+            border-bottom: 1px solid var(--gray);
+            padding: 10px 0;
+            z-index: 10;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .tab-content.active { display: flex; }
+
+        /* --- TAB 1: FAKE CHAT --- */
+        .chat-header {
+            padding: 15px;
+            background: var(--dark);
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .chat-name h3 { font-size: 16px; }
+        .chat-name span { font-size: 12px; color: #888; }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #000;
+        }
+
+        .msg {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .msg.received {
+            align-self: flex-start;
+            background: var(--chat-bg-other);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg.sent {
+            align-self: flex-end;
+            background: var(--chat-bg-me);
+            border-bottom-right-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* --- TAB 2: TIKTOK TRAFFIC MOCKUP --- */
+        .tiktok-ui {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .traffic-card {
+            background: var(--gray);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+        }
+
+        .traffic-title {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .traffic-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .target-badge {
+            display: inline-block;
+            background: rgba(254, 44, 85, 0.2);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid var(--primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #444;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            animation: fillProgress 3s ease-in-out infinite;
+        }
+
+        @keyframes fillProgress {
+            0% { width: 10%; }
+            50% { width: 78%; }
+            100% { width: 95%; }
+        }
+
+        .log-console {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #0f0;
+            text-align: left;
+            height: 150px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('chat')">💬 Chat</button>
+        <button class="tab-btn" onclick="switchTab('traffic')">📊 Traffic Tool</button>
+    </nav>
+
+    <div class="content">
+        <!-- TAB 1: FAKE CHAT -->
+        <div id="chat" class="tab-content active">
+            <div class="chat-header">
+                <div class="avatar">CJ</div>
+                <div class="chat-name">
+                    <h3>Christian James ❤️❤️</h3>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <!-- Pesan akan di-render via JS agar terlihat dinamis -->
+            </div>
+        </div>
+
+        <!-- TAB 2: TIKTOK TRAFFIC MOCKUP -->
+        <div id="traffic" class="tab-content">
+            <div class="tiktok-ui">
+                <div class="target-badge">TARGET: @AKSA_TIKTOK</div>
+                
+                <div class="traffic-card">
+                    <div class="traffic-title">Redirected Views</div>
+                    <div class="traffic-value" id="viewCount">1,240,893</div>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                </div>
+
+                <div class="traffic-card">
+                    <div class="traffic-title">Traffic Diversion Rate</div>
+                    <div class="traffic-value">87.4%</div>
+                </div>
+
+                <div class="log-console" id="consoleLog">
+                    > Initializing traffic router...<br>
+                    > Target locked: @aksa_tiktok<br>
+                    > Bypassing algorithm v4.2...<br>
+                    > Success. Rerouting FYP packets...<br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIC TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // --- LOGIC FAKE CHAT ---
+        const chatMessages = [
+            { type: 'received', text: "Hey, udah liat script yang kemarin?", time: "14:10" },
+            { type: 'sent', text: "Udah dong! Bagus banget btw 😍", time: "14:12" },
+            { type: 'received', text: "Syukur deh. Nanti kita meeting ya buat bahas detailnya", time: "14:13" },
+            { type: 'sent', text: "Oke siap, jam berapa?", time: "14:14" },
+            { type: 'received', text: "Jam 3 sore ya. Jangan telat! ❤️❤️", time: "14:15" }
+        ];
+
+        const chatBody = document.getElementById('chatBody');
+        chatMessages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `msg ${msg.type}`;
+            div.innerHTML = `${msg.text}<div class="timestamp">${msg.time}</div>`;
+            chatBody.appendChild(div);
+        });
+
+        // --- LOGIC FAKE TRAFFIC ANIMATION ---
+        const viewCounter = document.getElementById('viewCount');
+        const consoleLog = document.getElementById('consoleLog');
+        let views = 1240893;
+
+        setInterval(() => {
+            views += Math.floor(Math.random() * 50) + 10;
+            viewCounter.innerText = views.toLocaleString();
+        }, 800);
+
+        const fakeLogs = [
+            "> Intercepting hashtag #viral...",
+            "> Packet loss simulated on source account...",
+            "> Redirecting 450 users to target...",
+            "> Algorithm override successful.",
+            "> Refreshing FYP cache...",
+            "> New session injected for @aksa_tiktok"
+        ];
+
+        setInterval(() => {
+            const log = fakeLogs[Math.floor(Math.random() * fakeLogs.length)];
+            const p = document.createElement('div');
+            p.innerText = log;
+            consoleLog.appendChild(p);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }, 1500);
+    </script>
+</body>
+</html>
