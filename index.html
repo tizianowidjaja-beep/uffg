@@ -3,313 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Film Prop App</title>
+    <title>Film Prop: WA & Traffic Tool</title>
     <style>
         :root {
-            --primary: #fe2c55;
-            --dark: #121212;
-            --gray: #2f2f2f;
-            --text: #ffffff;
-            --chat-bg-me: #fe2c55;
-            --chat-bg-other: #2f2f2f;
+            --wa-green: #075e54;
+            --wa-light-green: #128c7e;
+            --wa-chat-bg: #ece5dd;
+            --wa-sent: #dcf8c6;
+            --wa-received: #ffffff;
+            --hacker-bg: #0d1117;
+            --hacker-panel: #161b22;
+            --hacker-accent: #58a6ff;
+            --hacker-alert: #f85149;
+            --text-dark: #111;
+            --text-light: #c9d1d9;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; user-select: none; -webkit-user-select: none; }
+        body { background: #000; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* === MAIN NAVIGATION (HACKER STYLE) === */
+        .main-nav {
+            display: flex;
+            background: var(--hacker-bg);
+            border-bottom: 1px solid #30363d;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .main-nav::-webkit-scrollbar { display: none; }
         
-        body {
-            background-color: #000;
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Tab Navigation */
-        .tab-nav {
-            display: flex;
-            background: var(--dark);
-            border-bottom: 1px solid var(--gray);
-            padding: 10px 0;
-            z-index: 10;
-        }
-
-        .tab-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 14px;
+        .nav-item {
+            padding: 12px 16px;
+            color: #8b949e;
+            font-size: 12px;
             font-weight: 600;
-            padding: 10px;
+            white-space: nowrap;
             cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-        }
-
-        /* Content Area */
-        .content {
-            flex: 1;
-            position: relative;
-            overflow-y: auto;
-        }
-
-        .tab-content {
-            display: none;
-            height: 100%;
-            flex-direction: column;
-        }
-
-        .tab-content.active { display: flex; }
-
-        /* --- TAB 1: FAKE CHAT --- */
-        .chat-header {
-            padding: 15px;
-            background: var(--dark);
-            border-bottom: 1px solid var(--gray);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .chat-name h3 { font-size: 16px; }
-        .chat-name span { font-size: 12px; color: #888; }
-
-        .chat-body {
-            flex: 1;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #000;
-        }
-
-        .msg {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .msg.received {
-            align-self: flex-start;
-            background: var(--chat-bg-other);
-            border-bottom-left-radius: 4px;
-        }
-
-        .msg.sent {
-            align-self: flex-end;
-            background: var(--chat-bg-me);
-            border-bottom-right-radius: 4px;
-        }
-
-        .timestamp {
-            font-size: 10px;
-            color: #aaa;
-            margin-top: 4px;
-            text-align: right;
-        }
-
-        /* --- TAB 2: TIKTOK TRAFFIC MOCKUP --- */
-        .tiktok-ui {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .traffic-card {
-            background: var(--gray);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid #444;
-        }
-
-        .traffic-title {
-            font-size: 12px;
-            color: #aaa;
+            border-bottom: 2px solid transparent;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
+            letter-spacing: 0.5px;
         }
+        .nav-item.active { color: var(--hacker-accent); border-bottom-color: var(--hacker-accent); }
+        .nav-item.dummy { opacity: 0.5; }
 
-        .traffic-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
+        /* === CONTENT CONTAINER === */
+        .app-container { flex: 1; position: relative; overflow: hidden; }
+        .screen { display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* === SCREEN 1: WHATSAPP FAKE CHAT === */
+        .wa-header {
+            background: var(--wa-green);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            z-index: 5;
         }
+        .wa-avatar { width: 38px; height: 38px; border-radius: 50%; background: #ddd; object-fit: cover; }
+        .wa-info h3 { font-size: 16px; font-weight: 600; }
+        .wa-info p { font-size: 11px; opacity: 0.8; }
 
-        .target-badge {
-            display: inline-block;
-            background: rgba(254, 44, 85, 0.2);
-            color: var(--primary);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            border: 1px solid var(--primary);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #444;
-            border-radius: 4px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            animation: fillProgress 3s ease-in-out infinite;
-        }
-
-        @keyframes fillProgress {
-            0% { width: 10%; }
-            50% { width: 78%; }
-            100% { width: 95%; }
-        }
-
-        .log-console {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 8px;
+        .wa-chat-area {
+            flex: 1;
+            background: var(--wa-chat-bg);
+            background-image: url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M50 50 L60 40 L70 50 L60 60 Z" fill="%23d1d7db" opacity="0.3"/%3E%3C/svg%3E');
             padding: 10px;
-            font-family: monospace;
-            font-size: 11px;
-            color: #0f0;
-            text-align: left;
-            height: 150px;
-            overflow: hidden;
-            margin-top: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        /* Utility */
-        .hidden { display: none !important; }
+        .bubble {
+            max-width: 80%;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+            position: relative;
+            line-height: 1.4;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+        .bubble.me { align-self: flex-end; background: var(--wa-sent); border-top-right-radius: 0; }
+        .bubble.them { align-self: flex-start; background: var(--wa-received); border-top-left-radius: 0; }
+        .bubble-meta { font-size: 10px; color: #666; text-align: right; margin-top: 2px; display: flex; justify-content: flex-end; gap: 3px; align-items: center; }
+
+        .wa-input-area {
+            background: #f0f0f0;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .wa-input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: white;
+        }
+        .wa-btn {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: var(--wa-light-green);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .mic-btn.recording { background: var(--hacker-alert); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        .recording-overlay {
+            display: none;
+            position: absolute; bottom: 60px; left: 0; right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+        }
+        .recording-overlay.show { display: block; }
+        .timer { font-family: monospace; font-size: 20px; color: var(--hacker-alert); margin-top: 5px; }
+
+        /* === SCREEN 2: TRAFFIC TOOL (PRO HACKER) === */
+        .tool-layout { display: flex; height: 100%; background: var(--hacker-bg); color: var(--text-light); }
+        .sidebar {
+            width: 60px;
+            background: var(--hacker-panel);
+            border-right: 1px solid #30363d;
+            display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 15px;
+        }
+        .side-icon { 
+            width: 36px; height: 36px; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 16px; color: #8b949e; cursor: pointer; transition: 0.2s;
+        }
+        .side-icon.active { background: rgba(88,166,255,0.15); color: var(--hacker-accent); }
+        .side-icon:hover:not(.active) { background: rgba(255,255,255,0.05); }
+
+        .tool-main { flex: 1; padding: 15px; overflow-y: auto; }
+        .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .tool-title { font-size: 14px; font-weight: 700; color: var(--hacker-accent); letter-spacing: 1px; }
+        .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: rgba(63,185,80,0.2); color: #3fb950; border: 1px solid #3fb950; }
+
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card {
+            background: var(--hacker-panel); border: 1px solid #30363d; border-radius: 8px; padding: 12px;
+        }
+        .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-val { font-size: 22px; font-weight: 800; font-family: 'Courier New', monospace; }
+        .accent { color: var(--hacker-accent); }
+        .alert { color: var(--hacker-alert); }
+
+        .terminal-box {
+            background: #010409; border: 1px solid #30363d; border-radius: 8px; 
+            padding: 10px; font-family: 'Courier New', monospace; font-size: 11px; 
+            color: #3fb950; height: 180px; overflow: hidden; line-height: 1.6;
+        }
+        .target-tag {
+            display: inline-block; background: rgba(248,81,73,0.15); color: var(--hacker-alert);
+            padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700;
+            border: 1px solid var(--hacker-alert); margin-bottom: 10px;
+        }
+
+        /* Dummy screens */
+        .dummy-screen { 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100%; color: #30363d; font-size: 14px; text-align: center; padding: 20px;
+            background: var(--hacker-bg);
+        }
     </style>
 </head>
 <body>
 
-    <!-- Tab Navigation -->
-    <nav class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('chat')">💬 Chat</button>
-        <button class="tab-btn" onclick="switchTab('traffic')">📊 Traffic Tool</button>
+    <!-- MAIN NAV -->
+    <nav class="main-nav">
+        <div class="nav-item active" onclick="switchScreen('chat', this)">MSG_INTERCEPT</div>
+        <div class="nav-item" onclick="switchScreen('traffic', this)">TRAFFIC_ROUTER</div>
+        <div class="nav-item dummy" onclick="switchScreen('dummy', this)">NET_SNIFFER</div>
+        <div class="nav-item dummy" onclick="switchScreen('dummy', this)">PAYLOAD_GEN</div>
+        <div class="nav-item dummy" onclick="switchScreen('dummy', this)">PROXY_CHAIN</div>
+        <div class="nav-item dummy" onclick="switchScreen('dummy', this)">LOG_ANALYZER</div>
     </nav>
 
-    <div class="content">
-        <!-- TAB 1: FAKE CHAT -->
-        <div id="chat" class="tab-content active">
-            <div class="chat-header">
-                <div class="avatar">CJ</div>
-                <div class="chat-name">
+    <div class="app-container">
+        
+        <!-- SCREEN: FAKE WA CHAT -->
+        <div id="chat" class="screen active">
+            <div class="wa-header">
+                <div class="wa-avatar" style="display:flex;align-items:center;justify-content:center;font-weight:bold;color:#333;">CJ</div>
+                <div class="wa-info">
                     <h3>Christian James ❤️❤️</h3>
-                    <span>Online</span>
+                    <p>online</p>
                 </div>
             </div>
-            <div class="chat-body" id="chatBody">
-                <!-- Pesan akan di-render via JS agar terlihat dinamis -->
+            
+            <div class="wa-chat-area" id="chatArea">
+                <div class="bubble them">Haii, gimana kabarnya? 😊<div class="bubble-meta">14:00</div></div>
+                <div class="bubble me">Baik dong! Kamu gimana?<div class="bubble-meta">14:02 ✓✓</div></div>
+                <div class="bubble them">Aku juga baik, kangen deh...<div class="bubble-meta">14:03</div></div>
+            </div>
+
+            <div class="recording-overlay" id="recOverlay">
+                🎙️ Merekam Pesan Suara...
+                <div class="timer" id="recTimer">00:00</div>
+                <div style="font-size:11px;margin-top:8px;opacity:0.7;">Ketuk untuk berhenti & kirim</div>
+            </div>
+
+            <div class="wa-input-area">
+                <input type="text" class="wa-input" id="msgInput" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
+                <button class="wa-btn mic-btn" id="micBtn" onmousedown="startRecording()" ontouchstart="startRecording()">🎤</button>
+                <button class="wa-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
 
-        <!-- TAB 2: TIKTOK TRAFFIC MOCKUP -->
-        <div id="traffic" class="tab-content">
-            <div class="tiktok-ui">
-                <div class="target-badge">TARGET: @AKSA_TIKTOK</div>
-                
-                <div class="traffic-card">
-                    <div class="traffic-title">Redirected Views</div>
-                    <div class="traffic-value" id="viewCount">1,240,893</div>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
+        <!-- SCREEN: TRAFFIC TOOL -->
+        <div id="traffic" class="screen">
+            <div class="tool-layout">
+                <div class="sidebar">
+                    <div class="side-icon active">📊</div>
+                    <div class="side-icon">⚙️</div>
+                    <div class="side-icon">🔑</div>
+                    <div class="side-icon">🛡️</div>
+                    <div class="side-icon">📡</div>
+                    <div class="side-icon" style="margin-top:auto;margin-bottom:10px;">❓</div>
                 </div>
+                <div class="tool-main">
+                    <div class="tool-header">
+                        <div class="tool-title">TIKTOK TRAFFIC DIVERT v3.8</div>
+                        <div class="status-badge">● ACTIVE</div>
+                    </div>
+                    
+                    <div class="target-tag">TARGET: @AKSA_TIKTOK</div>
 
-                <div class="traffic-card">
-                    <div class="traffic-title">Traffic Diversion Rate</div>
-                    <div class="traffic-value">87.4%</div>
+                    <div class="grid-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Diverted Views</div>
+                            <div class="stat-val accent" id="views">2,847,102</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Success Rate</div>
+                            <div class="stat-val" style="color:#3fb950;">94.7%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Active Nodes</div>
+                            <div class="stat-val">1,247</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Alg. Bypass</div>
+                            <div class="stat-val alert">ENABLED</div>
+                        </div>
+                    </div>
+
+                    <div class="terminal-box" id="termLog">
+                        > System initialized<br>
+                        > Connecting to proxy chain... OK<br>
+                        > Target fingerprint acquired<br>
+                        > Injecting diversion packets...<br>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="log-console" id="consoleLog">
-                    > Initializing traffic router...<br>
-                    > Target locked: @aksa_tiktok<br>
-                    > Bypassing algorithm v4.2...<br>
-                    > Success. Rerouting FYP packets...<br>
+        <!-- DUMMY SCREEN -->
+        <div id="dummy" class="screen">
+            <div class="dummy-screen">
+                <div>
+                    <div style="font-size:40px;margin-bottom:10px;">🔒</div>
+                    MODULE LOCKED<br>
+                    <span style="font-size:11px;opacity:0.5;">Requires Level 5 Clearance</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- LOGIC TAB SWITCHING ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        // === NAVIGATION ===
+        function switchScreen(id, btn) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
             
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                btn.classList.add('active');
+            }
         }
 
-        // --- LOGIC FAKE CHAT ---
-        const chatMessages = [
-            { type: 'received', text: "Hey, udah liat script yang kemarin?", time: "14:10" },
-            { type: 'sent', text: "Udah dong! Bagus banget btw 😍", time: "14:12" },
-            { type: 'received', text: "Syukur deh. Nanti kita meeting ya buat bahas detailnya", time: "14:13" },
-            { type: 'sent', text: "Oke siap, jam berapa?", time: "14:14" },
-            { type: 'received', text: "Jam 3 sore ya. Jangan telat! ❤️❤️", time: "14:15" }
-        ];
+        // === FAKE CHAT LOGIC ===
+        const chatArea = document.getElementById('chatArea');
+        const msgInput = document.getElementById('msgInput');
+        let isRecording = false;
+        let recInterval;
+        let seconds = 0;
 
-        const chatBody = document.getElementById('chatBody');
-        chatMessages.forEach(msg => {
+        function getTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        }
+
+        function addBubble(text, type) {
             const div = document.createElement('div');
-            div.className = `msg ${msg.type}`;
-            div.innerHTML = `${msg.text}<div class="timestamp">${msg.time}</div>`;
-            chatBody.appendChild(div);
-        });
+            div.className = `bubble ${type}`;
+            const meta = type === 'me' ? `${getTime()} ✓✓` : getTime();
+            div.innerHTML = `${text}<div class="bubble-meta">${meta}</div>`;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
 
-        // --- LOGIC FAKE TRAFFIC ANIMATION ---
-        const viewCounter = document.getElementById('viewCount');
-        const consoleLog = document.getElementById('consoleLog');
-        let views = 1240893;
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if(!text) return;
+            addBubble(text, 'me');
+            msgInput.value = '';
+            
+            // Auto reply fake setelah 1-2 detik
+            setTimeout(() => {
+                const replies = ["Oke siap! ❤️", "Wkwk bener banget 😂", "Nanti aku kabarin ya", "Miss you too 🥺", "Setuju deh 👍"];
+                const rand = replies[Math.floor(Math.random() * replies.length)];
+                addBubble(rand, 'them');
+            }, 1000 + Math.random() * 1500);
+        }
 
-        setInterval(() => {
-            views += Math.floor(Math.random() * 50) + 10;
-            viewCounter.innerText = views.toLocaleString();
-        }, 800);
+        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
 
-        const fakeLogs = [
-            "> Intercepting hashtag #viral...",
-            "> Packet loss simulated on source account...",
-            "> Redirecting 450 users to target...",
-            "> Algorithm override successful.",
-            "> Refreshing FYP cache...",
-            "> New session injected for @aksa_tiktok"
+        // Fake Mic Recording
+        const micBtn = document.getElementById('micBtn');
+        const recOverlay = document.getElementById('recOverlay');
+        const recTimer = document.getElementById('recTimer');
+
+        function startRecording() {
+            if(isRecording) {
+                // Stop recording
+                clearInterval(recInterval);
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                recOverlay.classList.remove('show');
+                
+                // Kirim bubble voice message palsu
+                const dur = formatTime(seconds);
+                addBubble(`🎤 ${dur}`, 'me');
+                seconds = 0;
+                recTimer.innerText = "00:00";
+            } else {
+                // Start recording
+                isRecording = true;
+                micBtn.classList.add('recording');
+                recOverlay.classList.add('show');
+                seconds = 0;
+                recInterval = setInterval(() => {
+                    seconds++;
+                    recTimer.innerText = formatTime(seconds);
+                }, 1000);
+            }
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60).toString().padStart(2,'0');
+            const sec = (s % 60).toString().padStart(2,'0');
+            return `${m}:${sec}`;
+        }
+
+        // === TRAFFIC TOOL ANIMATION ===
+        let viewCount = 2847102;
+        const viewsEl = document.getElementById('views');
+        const termLog = document.getElementById('termLog');
+        
+        const logs = [
+            "> Rerouting FYP algorithm stream...",
+            "> Packet injection successful (batch #" + Math.floor(Math.random()*999) + ")",
+            "> Bypassing rate limit... OK",
+            "> New session created for target",
+            "> Diverting hashtag traffic #viral",
+            "> Cache invalidation complete",
+            "> Node SG-04 responding... latency 12ms",
+            "> Engagement boost applied +340%",
+            "> Shadowban evasion active",
+            "> Refreshing token pool..."
         ];
 
         setInterval(() => {
-            const log = fakeLogs[Math.floor(Math.random() * fakeLogs.length)];
+            viewCount += Math.floor(Math.random() * 80) + 15;
+            viewsEl.innerText = viewCount.toLocaleString();
+        }, 600);
+
+        setInterval(() => {
+            const log = logs[Math.floor(Math.random() * logs.length)];
             const p = document.createElement('div');
             p.innerText = log;
-            consoleLog.appendChild(p);
-            consoleLog.scrollTop = consoleLog.scrollHeight;
-        }, 1500);
+            termLog.appendChild(p);
+            termLog.scrollTop = termLog.scrollHeight;
+            if(termLog.children.length > 20) termLog.removeChild(termLog.firstChild);
+        }, 1200);
     </script>
 </body>
 </html>
